@@ -1,5 +1,0 @@
-# inputs
-int64 number
----
-# outputs
-int64 doubled
