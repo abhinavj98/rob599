@@ -29,12 +29,17 @@ from sensor_msgs.msg import LaserScan
 class FetchMove:
     """Move fetch with velocity commands"""
     def __init__(self):
-        self.publisher = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-
+        self.vel_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        self.laser_scan_subscriber = rospy.Subscriber('base_scan', LaserScan, laser_scan_callback)
+    
     def publish_vel(self):
         msg = Twist()
         msg.linear.x = 0.1
-        self.publisher.publish(msg)
+        self.vel_publisher.publish(msg)
+
+    def laser_scan_callback(self, msg):
+        print(msg)
+
 
 
 if __name__ == '__main__':
