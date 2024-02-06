@@ -89,7 +89,7 @@ class Breadcrumb:
 
 			# Copy the transformed pose.  This is already in the map frame, after the TransformPose call.
 			crumb.pose = pose.pose
-
+	
 			# Add the marker to the marker array, and publish it out.
 			self.breadcrumbs.markers.append(crumb)
 			self.publisher.publish(self.breadcrumbs)
