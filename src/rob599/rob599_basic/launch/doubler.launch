@@ -1,0 +1,26 @@
+<!--
+	Example launch file, showing node starting and topic remapping
+
+	Bill Smart
+
+	This launch file shows how you can start a set of nodes, with topic remapping, using roslaunch,
+	rather than starting them all by individually.
+-->
+
+
+<launch>
+
+	<!-- Start a publisher node, remapping the topic name from "counter" to "number". -->
+	<node pkg="rob599_basic" name="publisher" type="publisher.py">
+		<remap from="counter" to="number" />
+	</node>
+
+	<!-- Start the doubler node, running with it's default settings. -->
+	<node pkg="rob599_basic" name="doubler" type="doubler.py" />
+
+	<!-- Start the subscriber node, remapping the topic name from "counter" to "doubled". -->
+	<node pkg="rob599_basic" name="subscriber" type="subscriber.py">
+		<remap from="counter" to="doubled" />\
+	</node>
+
+</launch>
