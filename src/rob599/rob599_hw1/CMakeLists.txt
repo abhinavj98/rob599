@@ -205,9 +205,3 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(hw1_3_node
-    src/hw1_3.py)
-
-target_link_libraries(hw1_3_node
-  ${catkin_LIBRARIES}
-)
