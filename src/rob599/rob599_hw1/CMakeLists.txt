@@ -10,6 +10,7 @@ project(rob599_hw1)
 find_package(catkin REQUIRED
 	rospy
 	std_msgs
+	message_generation
 	)
 
 ## System dependencies are found with CMake's conventions
@@ -66,10 +67,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
