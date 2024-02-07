@@ -12,11 +12,11 @@ class VelocityController:
     def __init__(self):
         self.vel_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=10)
 
-    def publish_vel(self, vel: List[float, float]):
+    def publish_vel(self, vel: List[float]):
         msg = Twist()
         msg.linear.x = vel[0]
-        msg.angular.z = vel[1]
-
+        #msg.angular.z = vel[1]
+        print(msg)
         self.vel_publisher.publish(msg)
 
     def stop(self):
@@ -35,6 +35,7 @@ class VelocityController:
     def forward_cartesian(self, ranges):
         if ranges is None:
             self.stop()
+            return
         dist = np.linalg.norm(ranges)
         if min(ranges) < 1:
             self.stop()
@@ -52,25 +53,23 @@ class FetchMove:
         self.vel_controller = VelocityController()
         self.size = 1
         self.tf_listener = tf.TransformListener()
-
-    # def get_fetch_pose(self):
-    #     try:
-    #         (trans,rot) = self.tf_listener.lookupTransform('/base_footprint', '/CameraTop_optical_frame', rospy.Time(0))
-    #     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-    #         continue
+        self.cartesian_in_front = None
+        self.laser_msg = None
     
     def laser_scan_callback(self, msg):
+        self.laser_msg = msg
         ranges_cartesian = self.polar_to_cartesian(msg.ranges, msg.angle_min, msg.angle_max, msg.angle_increment)
         #filter ranges_cartesian if it is in front
-        self.cartesian_in_front = filter(self.is_point_in_front, ranges_cartesian)
+        self.cartesian_in_front = list(filter(self.is_point_in_front, ranges_cartesian))
+        self.move()
 
     def polar_to_cartesian(self, ranges: List[float], angle_min: float, angle_max: float, angle_increment: float):
         angle = np.arange(angle_min, angle_max, angle_increment)
         x = ranges * np.cos(angle)
         y = ranges * np.sin(angle)
-        return x, y
+        return list(zip(x, y))
 
-    def is_point_in_front(self, range: float):
+    def is_point_in_front(self, range):
         fetch_points = [0., 0.]#get transform from world to laser
         #Will need robot orientation to get the correct min and max
 
@@ -83,16 +82,17 @@ class FetchMove:
         return x_min < x < x_max and y_min < y < y_max
     
     def move(self):
-        self.vel_controller.forward_cartesian(self.is_point_in_front)
+        self.vel_controller.forward_polar(self.laser_msg.ranges)
 
 
 
 if __name__ == '__main__':
     rospy.init_node('vel_publisher')
     fetch = FetchMove()
-    rate = rospy.Rate(10)
-    while not rospy.is_shutdown():
-        fetch.move()
-        rate.sleep()
+    rospy.spin()
+    #rate = rospy.Rate(10)
+    #while not rospy.is_shutdown():
+     #   #fetch.move()
+      #  rate.sleep()
 
         
