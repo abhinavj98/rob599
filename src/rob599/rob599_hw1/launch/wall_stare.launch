@@ -1,0 +1,10 @@
+<!--
+    Run node to filter laser scans and move fetch
+-->
+<launch>
+
+    <node pkg="rob599_hw1" name="laserscan_filter" type="laserscan_filter.py"/>
+    <node pkg="rob599_hw1" name="move_fetch" type="move_fetch.py"/>
+
+</launch>
+    

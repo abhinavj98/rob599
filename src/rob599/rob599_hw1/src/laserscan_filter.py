@@ -21,15 +21,14 @@ class LaserScanFilter:
         
     @staticmethod
     def polar_to_cartesian(ranges: List[float], angle_min: float, angle_max: float, angle_increment: float):
-            angle = np.arange(angle_min, angle_max, angle_increment)
-            x = ranges * np.cos(angle)
-            y = ranges * np.sin(angle)
-            return list(zip(x, y))
+        angle = np.arange(angle_min, angle_max, angle_increment)
+        x = ranges * np.cos(angle)
+        y = ranges * np.sin(angle)
+        return list(zip(x, y))
 
 
     def is_point_in_front(self, range):
-        fetch_points = [0., 0.]#get transform from world to laser
-        #Will need robot orientation to get the correct min and max
+        fetch_points = [0., 0.] #Laser link coordinates
 
         x_min = fetch_points[0] 
         x_max = fetch_points[0] + 1
