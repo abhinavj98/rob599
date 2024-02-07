@@ -5,18 +5,25 @@ from sensor_msgs.msg import LaserScan
 from typing import List
 import numpy as np
 import tf
-
+from rob599_hw1.srv import StoppingDist, StoppingDistResponse
 
 class VelocityController:
     """Velocity controller for the fetch robot"""
     def __init__(self):
         self.vel_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        self.set_stopping_dist_srv = rospy.Service('set_stopping_dist', StoppingDist, self.set_stopping_dist)
+        self.stopping_distance = 1.
+        self.max_velocity = 1.
 
+    def set_stopping_dist(self, request):
+        if request.dist < 0:
+            return StoppingDistResponse(False)
+        self.set_stopping_dist = request.dist
+        return StoppingDistResponse(True) 
+    
     def publish_vel(self, vel: List[float]):
         msg = Twist()
         msg.linear.x = vel[0]
-        #msg.angular.z = vel[1]
-        print(msg)
         self.vel_publisher.publish(msg)
 
     def stop(self):
@@ -27,9 +34,9 @@ class VelocityController:
             self.stop()
         else:
             min_dist = np.min(ranges)
-            velocity = 1*(min_dist - 1)
+            velocity = (min_dist - self.stopping_distance)
             #clip velocity to 0 and 0.5
-            velocity = max(0, min(1, velocity))
+            velocity = max(0, min(self.max_velocity, velocity))
             self.publish_vel([velocity, 0])
     
 class FetchMove:

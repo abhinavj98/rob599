@@ -1,0 +1,5 @@
+# inputs
+int64 dist
+---
+# outputs
+bool success
