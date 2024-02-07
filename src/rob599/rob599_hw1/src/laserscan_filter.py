@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import sys
-from geometry_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan
 import numpy as np
 from typing import List
 import copy
@@ -10,7 +10,7 @@ class LaserScanFilter:
     """Take in raw laser scan and filter to points just in front of fetch"""
     def __init__(self):
         self.laser_scan_subscriber = rospy.Subscriber('base_scan', LaserScan, self.filter_callback)
-        self.laser_scan_publisher = rospy.Publisher('base_scan_filtered', LaserScan)
+        self.laser_scan_publisher = rospy.Publisher('base_scan_filtered', LaserScan, queue_size = 10)
         
     def filter_callback(self, msg):
         filtered_msg = copy.deepcopy(msg)
@@ -31,10 +31,10 @@ class LaserScanFilter:
         fetch_points = [0., 0.]#get transform from world to laser
         #Will need robot orientation to get the correct min and max
 
-        x_min = fetch_points[0] - 0.5
-        x_max = fetch_points[0] + 0.5
-        y_min = fetch_points[1]
-        y_max = fetch_points[1] + 1
+        x_min = fetch_points[0] 
+        x_max = fetch_points[0] + 1
+        y_min = fetch_points[1] - 0.5
+        y_max = fetch_points[1] + 0.5
         x = range[0]
         y = range[1]
         if x_min < x < x_max and y_min < y < y_max:
