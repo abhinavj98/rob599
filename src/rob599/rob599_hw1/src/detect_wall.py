@@ -8,6 +8,7 @@ import copy
 from sklearn.linear_model import LinearRegression
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
+from std_msgs.msg import Int32
 import tf
 
 
@@ -15,7 +16,10 @@ class DetectWall:
     def __init__(self):
         #subscribe to filtered scan
         self.laser_scan_subscriber = rospy.Subscriber('base_scan_filtered', LaserScan, self.laser_scan_callback)
+        self.wall_angle_publisher = rospy.Publisher('wall_angle', Int32, queue_size=10)
         self.marker_pub = rospy.Publisher('wall_marker', Marker, queue_size=10)
+        self.text_publisher = rospy.Publisher('wall_text', Marker, queue_size=10)
+        
         self.model = None
 
     def laser_scan_callback(self, msg):
@@ -29,6 +33,7 @@ class DetectWall:
         self.model.fit(X, Y)
         slope = self.model.coef_[0]
         angle_radians = np.arctan(slope)
+        self.wall_angle_publisher.publish(angle_radians)
         self.visualize_fit(X, angle_radians)
         
         
@@ -73,7 +78,7 @@ class DetectWall:
 
         marker.text = str(angle)  # Text content
 
-        self.marker_pub.publish(marker)
+        self.text_publisher.publish(marker)
 
     @staticmethod
     def polar_to_cartesian(ranges: List[float], angle_min: float, angle_max: float, angle_increment: float):
