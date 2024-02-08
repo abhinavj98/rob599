@@ -8,6 +8,7 @@ import copy
 from sklearn.linear_model import LinearRegression
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
+import tf
 
 
 class DetectWall:
@@ -15,7 +16,7 @@ class DetectWall:
         #subscribe to filtered scan
         self.laser_scan_subscriber = rospy.Subscriber('base_scan_filtered', LaserScan, self.laser_scan_callback)
         self.marker_pub = rospy.Publisher('wall_marker', Marker, queue_size=10)
-        
+        self.listener = tf.TransformListener()
         self.model = None
 
     def laser_scan_callback(self, msg):
@@ -28,7 +29,9 @@ class DetectWall:
         self.model = LinearRegression()
         self.model.fit(X, Y)
         self.visualize_fit(X)
-    
+        _, rot = self.listener.lookupTransform('base_link', 'laser_link', rospy.Time(0))
+        rotation_matrix = tf.transformations.quaternion_matrix(rot)[:3, :3]
+        print(rotation_matrix)
     def visualize_fit(self, X):
         y_pred = [0,0]
         x_pred = [X[0], X[-1]]
