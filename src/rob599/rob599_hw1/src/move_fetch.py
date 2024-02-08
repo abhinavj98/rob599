@@ -133,7 +133,7 @@ class FetchMove:
         marker.pose.position.y = 0.0
         marker.pose.position.z = 1.0
 
-        marker.text = str(min_range)  # Text content
+        marker.text = "Wall Distance: " + str(min_range)  # Text content
 
         self.text_publisher.publish(marker)
 
