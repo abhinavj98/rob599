@@ -5,7 +5,7 @@
 
     <node pkg="rob599_hw1" name="laserscan_filter" type="laserscan_filter.py"/>
     <node pkg="rob599_hw1" name="move_fetch" type="move_fetch.py"/>
-    <node pkg="rob599_hw1" name="laserscan_filter" type = "laserscan_filter.py"/>
+    <node pkg="rob599_hw1" name="detect_wall" type = "detect_wall.py"/>
 
 </launch>
     
