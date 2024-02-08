@@ -1,5 +1,5 @@
 #goal
-float goal
+float32 goal
 ---
 #result
 bool success
