@@ -29,11 +29,11 @@ class LaserScanFilter:
 
     def is_point_in_front(self, range):
         fetch_points = [0., 0.] #Laser link coordinates
-        fetch_size = 1
+        fetch_size = 1.
 
         x_min = fetch_points[0] 
-        y_min = fetch_points[1] - fetch_size
-        y_max = fetch_points[1] + fetch_size
+        y_min = fetch_points[1] - fetch_size/2
+        y_max = fetch_points[1] + fetch_size/2
         x = range[0]
         y = range[1]
         if x_min < x  and y_min < y < y_max:

@@ -13,9 +13,9 @@ def done_callback(status, result):
 	# The status argument tells you if the action succeeded.  Sometimes actions that did not succeed can
 	# return partial results.
 	if status == actionlib.GoalStatus.SUCCEEDED:
-		rospy.loginfo('Suceeded with result {0}'.format(result.sequence))
+		rospy.loginfo('Suceeded with result {0}'.format(result.success))
 	else:
-		rospy.loginfo('Failed with result {0}'.format(result.sequence))
+		rospy.loginfo('Failed with result {0}'.format(result.success))
 
 
 # This callback will be called when the action becomes active on the server.  If the server is
@@ -27,7 +27,7 @@ def active_callback():
 
 # This callback is called every time the server issues a feedback message.
 def feedback_callback(feedback):
-	rospy.loginfo('Feedback: {0}'.format(feedback.progress))
+	rospy.loginfo('Feedback: {0}'.format(feedback.dist))
 
 
 if __name__ == '__main__':
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	client.wait_for_server()
 
 	# Create a goal message to send to the server.
-	goal = StoppingGoal(number=n)
+	goal = StoppingGoal(goal=n)
 
 	# Send the action request, and register the callbacks.  Note that different requests to the same server
 	# can have different callbacks. to make things easier to keep track of.

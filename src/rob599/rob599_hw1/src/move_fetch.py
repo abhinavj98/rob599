@@ -7,7 +7,7 @@ import numpy as np
 import actionlib
 from rob599_hw1.srv import StoppingDist, StoppingDistResponse
 from rob599_hw1.msg import StoppingAction, StoppingGoal, StoppingFeedback, StoppingResult
-
+import time
 class VelocityController:
     """Velocity controller for the fetch robot"""
     def __init__(self):
@@ -49,6 +49,8 @@ class FetchMove:
         self.action_server = actionlib.SimpleActionServer('move_to_wall', StoppingAction, self.action_callback, False)
         self.ranges = None
         self.size = 1
+        self.action_server.start()
+        rospy.loginfo('action server started')
         
     def action_callback(self, goal):
         while True:
@@ -57,9 +59,10 @@ class FetchMove:
             if self.action_server.is_new_goal_available():
                 self.action_server.set_preempted(StoppingResult(success=False))
                 return
-            if goal >= min_dist:
+            if goal.goal >= min_dist:
                 self.action_server.set_succeeded(StoppingResult(success=True))
                 break
+            time.sleep(0.5)
 
 
     def laser_scan_callback(self, msg):
