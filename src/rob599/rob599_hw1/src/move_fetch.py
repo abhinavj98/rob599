@@ -8,6 +8,7 @@ import actionlib
 from rob599_hw1.srv import StoppingDist, StoppingDistResponse
 from rob599_hw1.msg import StoppingAction, StoppingGoal, StoppingFeedback, StoppingResult
 
+action_in_progress = True
 class VelocityController:
     """Velocity controller for the fetch robot"""
     def __init__(self):
@@ -17,6 +18,10 @@ class VelocityController:
         self.max_velocity = 1.
 
     def set_stopping_dist(self, request):
+        global action_in_progress
+        if action_in_progress:
+            rospy.logwarn("Service calls are disabled.")
+            return StoppingDistResponse(False)
         if request.dist < 0:
             return StoppingDistResponse(False)
         self.set_stopping_dist = request.dist
@@ -51,6 +56,8 @@ class FetchMove:
         self.size = 1
         
     def action_callback(self, goal):
+        global action_in_progress
+        action_in_progress = True
         while True:
             min_dist = self.move(self.ranges)
             self.action_server.publish_feedback(StoppingFeedback(dist = min_dist))
@@ -59,6 +66,7 @@ class FetchMove:
                 return
             if goal >= min_dist:
                 self.action_server.set_succeeded(StoppingResult(success=True))
+                action_in_progress = False
                 break
 
 
