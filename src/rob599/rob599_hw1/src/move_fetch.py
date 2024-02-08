@@ -57,7 +57,7 @@ class FetchMove:
         self.laser_scan_subscriber = rospy.Subscriber('base_scan_filtered', LaserScan, self.laser_scan_callback)
         self.vel_controller = VelocityController()
         self.line_publisher = rospy.Publisher('visualization_line', Marker, queue_size=10)
-    
+        self.text_publisher = rospy.Publisher('visualization_text', Marker, queue_size=10)
         self.action_server = actionlib.SimpleActionServer('move_to_wall', StoppingAction, self.action_callback, False)
         self.ranges = None
         self.size = 1
@@ -88,7 +88,7 @@ class FetchMove:
         min_range_index = ranges.index(min(ranges))
         x = ranges[min_range_index]*np.cos(angle[min_range_index])
         y = ranges[min_range_index]*np.sin(angle[min_range_index])
-        return x, y
+        return x, y, ranges[min_range_index]
 
 
     def rviz_publish_line(self):
@@ -108,7 +108,7 @@ class FetchMove:
         p1.z = 0.0
 
         p2 = Point()
-        min_x, min_y = self.polar_to_min_cartesian(self.msg.ranges, self.msg.angle_min, self.msg.angle_max, self.msg.angle_increment)
+        min_x, min_y, min_range = self.polar_to_min_cartesian(self.msg.ranges, self.msg.angle_min, self.msg.angle_max, self.msg.angle_increment)
         p2.x = min_x
         p2.y = min_y
         p2.z = 0.0
@@ -117,6 +117,25 @@ class FetchMove:
         marker.points.append(p2)
 
         self.line_publisher.publish(marker)
+
+        marker = Marker()
+        marker.header.frame_id = "laser_link"  # Change the frame ID if needed
+        marker.type = Marker.TEXT_VIEW_FACING
+        marker.action = Marker.ADD
+        marker.scale.z = 0.1  # Text size
+
+        marker.color.r = 1.0  # Red
+        marker.color.g = 1.0  # Green
+        marker.color.b = 1.0  # Blue
+        marker.color.a = 1.0  # Alpha (transparency)
+
+        marker.pose.position.x = 0.0  # Text position
+        marker.pose.position.y = 0.0
+        marker.pose.position.z = 1.0
+
+        marker.text = str(min_range)  # Text content
+
+        self.text_publisher.publish(marker)
 
 
     def laser_scan_callback(self, msg):
