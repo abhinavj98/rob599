@@ -6,7 +6,8 @@ import numpy as np
 from typing import List
 import copy
 from sklearn.linear_model import LinearRegression
-from visualization_msgs.msg import Marker, Point
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
 
 
 class DetectWall:
@@ -48,10 +49,16 @@ class DetectWall:
             marker.points.append(point)
 
         self.marker_pub.publish(marker)
-        
+
     @staticmethod
     def polar_to_cartesian(ranges: List[float], angle_min: float, angle_max: float, angle_increment: float):
         angle = np.arange(angle_min, angle_max, angle_increment)
         x = ranges * np.cos(angle)
         y = ranges * np.sin(angle)
         return x, y
+    
+
+if __name__ == "__main__":
+    rospy.init_node('wall_detect')
+    fetch = DetectWall()
+    rospy.spin()
