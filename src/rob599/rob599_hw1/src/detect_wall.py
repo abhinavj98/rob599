@@ -16,7 +16,6 @@ class DetectWall:
         #subscribe to filtered scan
         self.laser_scan_subscriber = rospy.Subscriber('base_scan_filtered', LaserScan, self.laser_scan_callback)
         self.marker_pub = rospy.Publisher('wall_marker', Marker, queue_size=10)
-        self.listener = tf.TransformListener()
         self.model = None
 
     def laser_scan_callback(self, msg):
@@ -28,11 +27,12 @@ class DetectWall:
         # Fit a line using scikit-learn's LinearRegression
         self.model = LinearRegression()
         self.model.fit(X, Y)
-        self.visualize_fit(X)
-        _, rot = self.listener.lookupTransform('base_link', 'laser_link', rospy.Time(0))
-        rotation_matrix = tf.transformations.quaternion_matrix(rot)[:3, :3]
-        print(rotation_matrix)
-    def visualize_fit(self, X):
+        slope = self.model.coef_[0]
+        angle_radians = np.arctan(slope)
+        self.visualize_fit(X, angle_radians)
+        
+        
+    def visualize_fit(self, X, angle):
         y_pred = [0,0]
         x_pred = [X[0], X[-1]]
 
@@ -53,6 +53,25 @@ class DetectWall:
             point.y = y_pred[i]
             point.z = 0.0
             marker.points.append(point)
+
+        self.marker_pub.publish(marker)
+
+        marker = Marker()
+        marker.header.frame_id = "laser_link"  # Change the frame ID if needed
+        marker.type = Marker.TEXT_VIEW_FACING
+        marker.action = Marker.ADD
+        marker.scale.z = 0.1  # Text size
+
+        marker.color.r = 1.0  # Red
+        marker.color.g = 1.0  # Green
+        marker.color.b = 1.0  # Blue
+        marker.color.a = 1.0  # Alpha (transparency)
+
+        marker.pose.position.x = 0.0  # Text position
+        marker.pose.position.y = 0.0
+        marker.pose.position.z = 1.0
+
+        marker.text = str(angle)  # Text content
 
         self.marker_pub.publish(marker)
 
