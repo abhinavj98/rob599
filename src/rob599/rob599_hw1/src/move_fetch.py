@@ -4,8 +4,9 @@ from geometry_msgs.msg import Quaternion, Twist
 from sensor_msgs.msg import LaserScan
 from typing import List
 import numpy as np
-import tf
+import actionlib
 from rob599_hw1.srv import StoppingDist, StoppingDistResponse
+from rob599_hw1.msg import StoppingAction, StoppingGoal, StoppingFeedback, StoppingResult
 
 class VelocityController:
     """Velocity controller for the fetch robot"""
@@ -30,7 +31,7 @@ class VelocityController:
         self.publish_vel([0, 0])
 
     def forward_polar(self, ranges: List[float]):
-        if min(ranges) < 1:
+        if min(ranges) < self.stopping_distance:
             self.stop()
         else:
             min_dist = np.min(ranges)
@@ -38,19 +39,34 @@ class VelocityController:
             #clip velocity to 0 and 0.5
             velocity = max(0, min(self.max_velocity, velocity))
             self.publish_vel([velocity, 0])
+        return min(ranges)
     
 class FetchMove:
     """Move fetch with velocity commands"""
     def __init__(self):
         self.laser_scan_subscriber = rospy.Subscriber('base_scan_filtered', LaserScan, self.laser_scan_callback)
         self.vel_controller = VelocityController()
+        self.action_server = actionlib.SimpleActionServer('move_to_wall', StoppingAction, self.action_callback, False)
+        self.ranges = None
         self.size = 1
         
+    def action_callback(self, goal):
+        while True:
+            min_dist = self.move(self.ranges)
+            self.action_server.publish_feedback(StoppingFeedback(dist = min_dist))
+            if self.action_server.is_new_goal_available():
+                self.action_server.set_preempted(StoppingResult(success=False))
+                return
+            if goal >= min_dist:
+                self.action_server.set_succeeded(StoppingResult(success=True))
+                break
+
+
     def laser_scan_callback(self, msg):
-        self.move(msg.ranges)
+        self.ranges = msg.ranges
     
     def move(self, ranges):
-        self.vel_controller.forward_polar(ranges=ranges)
+        return self.vel_controller.forward_polar(ranges=ranges)
 
 
 

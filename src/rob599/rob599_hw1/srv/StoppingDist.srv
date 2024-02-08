@@ -1,5 +1,5 @@
 # inputs
-int64 dist
+float dist
 ---
 # outputs
 bool success

@@ -1,0 +1,8 @@
+#goal
+float goal
+---
+#result
+bool success
+---
+#feedback
+float dist
