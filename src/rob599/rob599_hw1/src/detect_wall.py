@@ -22,15 +22,18 @@ class DetectWall:
         x, y = self.polar_to_cartesian(msg.ranges, msg.angle_min,
                                             msg.angle_max, msg.angle_increment)
         
-        X = x.reshape(-1, 1)  # Reshape x to a column vector for scikit-learn
-
+        X = x[abs(x)!=np.inf].reshape(-1, 1)
+        Y = y[abs(x)!=np.inf].reshape(-1, 1)
+        print(X.shape, Y.shape)
         # Fit a line using scikit-learn's LinearRegression
         self.model = LinearRegression()
-        self.model.fit(X, y)
+        self.model.fit(X, Y)
         self.visualize_fit(X)
     
     def visualize_fit(self, X):
-        y_pred = self.model.predict(X)
+        y_pred = [0,0]
+        y_pred[0] = self.model.predict(X[0].reshape(-1,1))
+        y_pred[1] = self.model.predict(X[-1].reshape(-1,1))
         # Publish the original points as markers
         marker = Marker()
         marker.header.frame_id = 'laser_link'
@@ -40,10 +43,9 @@ class DetectWall:
         marker.scale.y = 0.1
         marker.color.r = 1.0
         marker.color.a = 1.0
-
-        for i in range(len(X)):
+        for i in range(2):
             point = Point()
-            point.x = x[i]
+            point.x = X[i]
             point.y = y_pred[i]
             point.z = 0.0
             marker.points.append(point)
