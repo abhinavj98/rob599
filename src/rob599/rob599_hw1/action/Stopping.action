@@ -5,4 +5,4 @@ float goal
 bool success
 ---
 #feedback
-float dist
+float32 dist

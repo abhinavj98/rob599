@@ -1,5 +1,5 @@
 # inputs
-float dist
+float32 dist
 ---
 # outputs
 bool success
